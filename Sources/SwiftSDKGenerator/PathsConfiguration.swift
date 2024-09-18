@@ -13,11 +13,9 @@
 import struct SystemPackage.FilePath
 
 public struct PathsConfiguration: Sendable {
-  init(sourceRoot: FilePath, artifactID: String, targetTriple: Triple) {
+  init(sourceRoot: FilePath, artifactBundlePath: FilePath, artifactID: String, targetTriple: Triple) {
     self.sourceRoot = sourceRoot
-    self.artifactBundlePath = sourceRoot
-      .appending("Bundles")
-      .appending("\(artifactID).artifactbundle")
+    self.artifactBundlePath = artifactBundlePath
     self.artifactsCachePath = sourceRoot.appending("Artifacts")
     self.swiftSDKRootPath = self.artifactBundlePath
       .appending(artifactID)

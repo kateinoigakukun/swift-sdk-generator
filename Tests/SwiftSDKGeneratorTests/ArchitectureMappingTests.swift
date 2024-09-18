@@ -62,6 +62,7 @@ final class ArchitectureMappingTests: XCTestCase {
 
       // Linux is currently the only supported runtime environment
       targetTriple: targetTriple,
+      artifactBundlePath: nil,
       artifactID: recipe.defaultArtifactID,
       // Remaining fields are placeholders which are the same for all
       // combinations of build and runtime architecture

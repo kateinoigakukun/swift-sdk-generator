@@ -29,6 +29,7 @@ public actor SwiftSDKGenerator {
   public init(
     bundleVersion: String,
     targetTriple: Triple,
+    artifactBundlePath: FilePath?,
     artifactID: String,
     isIncremental: Bool,
     isVerbose: Bool,
@@ -49,6 +50,9 @@ public actor SwiftSDKGenerator {
 
     self.pathsConfiguration = .init(
       sourceRoot: sourceRoot,
+      artifactBundlePath: artifactBundlePath ?? sourceRoot
+        .appending("Bundles")
+        .appending("\(artifactID).artifactbundle"),
       artifactID: self.artifactID,
       targetTriple: self.targetTriple
     )

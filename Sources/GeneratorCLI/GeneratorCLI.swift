@@ -33,6 +33,7 @@ struct GeneratorCLI: AsyncParsableCommand {
       let generator = try await SwiftSDKGenerator(
         bundleVersion: options.bundleVersion,
         targetTriple: targetTriple,
+        artifactBundlePath: options.artifactBundlePath.map { FilePath($0) },
         artifactID: options.sdkName ?? recipe.defaultArtifactID,
         isIncremental: options.incremental,
         isVerbose: options.verbose,
@@ -70,6 +71,9 @@ extension Triple: ExpressibleByArgument {
 
 extension GeneratorCLI {
   struct GeneratorOptions: ParsableArguments {
+    @Argument(help: "Path to .artifactbundle to be created or updated.")
+    var artifactBundlePath: String?
+
     @Option(help: "An arbitrary version number for informational purposes.")
     var bundleVersion = "0.0.1"
 
