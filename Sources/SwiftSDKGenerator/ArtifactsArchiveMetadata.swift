@@ -14,7 +14,7 @@ import Foundation
 
 public struct ArtifactsArchiveMetadata: Equatable, Codable {
   public let schemaVersion: String
-  public let artifacts: [String: Artifact]
+  public var artifacts: [String: Artifact]
 
   public init(schemaVersion: String, artifacts: [String: Artifact]) {
     self.schemaVersion = schemaVersion

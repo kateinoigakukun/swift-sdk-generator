@@ -13,11 +13,17 @@
 import SystemPackage
 
 import class Foundation.JSONEncoder
+import class Foundation.JSONDecoder
 
 private let encoder: JSONEncoder = {
   let encoder = JSONEncoder()
   encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
   return encoder
+}()
+
+private let decoder: JSONDecoder = {
+  let decoder = JSONDecoder()
+  return decoder
 }()
 
 extension SwiftSDKGenerator {
@@ -90,26 +96,38 @@ extension SwiftSDKGenerator {
     logGenerationStep("Generating .artifactbundle manifest file...")
 
     let artifactBundleManifestPath = pathsConfiguration.artifactBundlePath.appending("info.json")
+    var manifest: ArtifactsArchiveMetadata
+    // Read the existing manifest content if it exists
+    if doesFileExist(at: artifactBundleManifestPath) {
+      manifest = try decoder.decode(ArtifactsArchiveMetadata.self, from: readFile(at: artifactBundleManifestPath))
+    } else {
+      // Otherwise, create a new manifest
+      manifest = ArtifactsArchiveMetadata(schemaVersion: "1.0", artifacts: [:])
+    }
 
-    try writeFile(
-      at: artifactBundleManifestPath,
-      encoder.encode(
-        ArtifactsArchiveMetadata(
-          schemaVersion: "1.0",
-          artifacts: [
-            artifactID: .init(
-              type: .swiftSDK,
-              version: self.bundleVersion,
-              variants: [
-                .init(
-                  path: FilePath(artifactID).appending(self.targetTriple.triple).string,
-                  supportedTriples: hostTriples.map { $0.map(\.triple) }
-                ),
-              ]
-            ),
-          ]
-        )
+    // Warn if the manifest already contains an artifact with the same ID
+    if manifest.artifacts.keys.contains(artifactID) {
+      logGenerationStep(
+        """
+        Warning: The .artifactbundle manifest already contains an artifact with the ID \(artifactID). \
+        The existing artifact will be overwritten.
+        """
       )
+    }
+
+    // Add the new artifact to the manifest
+    manifest.artifacts[artifactID] = ArtifactsArchiveMetadata.Artifact(
+      type: .swiftSDK,
+      version: self.bundleVersion,
+      variants: [
+        ArtifactsArchiveMetadata.Variant(
+          path: FilePath(artifactID).appending(self.targetTriple.triple).string,
+          supportedTriples: hostTriples.map { $0.map(\.triple) }
+        ),
+      ]
     )
+
+    // Write the updated manifest back to the file
+    try writeFile(at: artifactBundleManifestPath, encoder.encode(manifest))
   }
 }
